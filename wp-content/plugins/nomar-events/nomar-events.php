@@ -75,7 +75,9 @@ function create_post_type_events()
 			'public' => true,
 			'has_archive' => true,
 			'rewrite' => array('slug' => 'events'),
-			'supports' => array('custom-fields', 'title', 'editor')
+			'supports' => array('title', 'editor', 'thumbnail', 'custom-fields', 'revisions'),
+			'taxonomies' => array('category', 'post_tag'), // Adds support for categories and tags
+			'show_in_rest' => true, // Enables Gutenberg editor support
 		)
 	);
 }
@@ -600,6 +602,36 @@ function schedule_tangilla_sync()
 add_action('wp', 'schedule_tangilla_sync');
 
 add_action('tangilla_sync_event', 'sync_events_with_api');
+
+
+function make_acf_fields_read_only($field)
+{
+	$field['readonly'] = true; // Make the field read-only
+	$field['disabled'] = true; // Disable the field, which will prevent editing
+
+	// Set the value directly in the input HTML to retain the current value
+	if (!empty($field['value'])) {
+		$field['wrapper']['data-value'] = $field['value'];
+	}
+
+	return $field;
+}
+add_filter('acf/load_field', 'make_acf_fields_read_only');
+
+function custom_admin_styles()
+{
+	echo '
+	<style>
+			.acf-field[data-value] input,
+			.acf-field[data-value] textarea,
+			.acf-field[data-value] select {
+					background-color: #f1f1f1; /* Light grey background */
+					pointer-events: none; /* Prevent interaction */
+			}
+	</style>
+	';
+}
+add_action('admin_head', 'custom_admin_styles');
 
 // function unschedule_tangilla_sync() {
 // 	$timestamp = wp_next_scheduled('tangilla_sync_event');
