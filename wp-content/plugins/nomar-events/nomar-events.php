@@ -94,6 +94,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Capacity',
 				'name' => 'capacity',
 				'type' => 'number',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -101,6 +102,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'CE',
 				'name' => 'ce',
 				'type' => 'true_false',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -108,6 +110,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'CE Credits',
 				'name' => 'ce_credits',
 				'type' => 'number',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -115,13 +118,15 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'CE Type Name',
 				'name' => 'ce_type_name',
 				'type' => 'text',
-				'required' => 0,
+				'show_in_rest' => true,
+				'required' => 0
 			),
 			array(
 				'key' => 'field_course_id',
 				'label' => 'Course ID',
 				'name' => 'course_id',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -129,6 +134,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Course Image',
 				'name' => 'course_image',
 				'type' => 'url',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -136,6 +142,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Course Number',
 				'name' => 'course_number',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -143,6 +150,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Early Bird End Date',
 				'name' => 'early_bird_end_date',
 				'type' => 'date_picker',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -150,6 +158,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Early Bird Member Price',
 				'name' => 'early_bird_member_price',
 				'type' => 'number',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -157,6 +166,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Early Bird Price',
 				'name' => 'early_bird_price',
 				'type' => 'number',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -164,6 +174,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Early Bird Pricing',
 				'name' => 'early_bird_pricing',
 				'type' => 'true_false',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -171,6 +182,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'End Time',
 				'name' => 'end_time',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -178,6 +190,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Event Date',
 				'name' => 'event_date',
 				'type' => 'date_picker',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -185,6 +198,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Event Description',
 				'name' => 'event_description',
 				'type' => 'textarea',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -192,6 +206,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Event ID',
 				'name' => 'event_id',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -199,6 +214,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Event Title',
 				'name' => 'event_title',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -206,6 +222,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Event Type',
 				'name' => 'event_type',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -213,6 +230,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Instructor 2 Bio',
 				'name' => 'instructor2_bio',
 				'type' => 'textarea',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -220,6 +238,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Instructor 2 Image',
 				'name' => 'instructor2_image',
 				'type' => 'url',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -227,6 +246,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Instructor 2 Name',
 				'name' => 'instructor2_name',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -234,6 +254,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Instructor Bio',
 				'name' => 'instructor_bio',
 				'type' => 'textarea',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -241,6 +262,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Instructor Image',
 				'name' => 'instructor_image',
 				'type' => 'url',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -248,6 +270,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Instructor Name',
 				'name' => 'instructor_name',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -255,6 +278,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Last Updated',
 				'name' => 'last_updated',
 				'type' => 'date_picker',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -262,6 +286,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Location',
 				'name' => 'location',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -269,6 +294,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Location Address',
 				'name' => 'location_address',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -276,6 +302,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Location Notes',
 				'name' => 'location_notes',
 				'type' => 'textarea',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -283,6 +310,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Location Type',
 				'name' => 'location_type',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -290,6 +318,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Member Only',
 				'name' => 'member_only',
 				'type' => 'true_false',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -297,6 +326,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Member Price',
 				'name' => 'member_price',
 				'type' => 'number',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -304,6 +334,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Online Registration',
 				'name' => 'online_registration',
 				'type' => 'true_false',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -311,6 +342,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Price',
 				'name' => 'price',
 				'type' => 'number',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -318,6 +350,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Provider Name',
 				'name' => 'provider_name',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -325,6 +358,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Provider Number',
 				'name' => 'provider_number',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -332,6 +366,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Registered',
 				'name' => 'registered',
 				'type' => 'number',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -339,6 +374,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Registration Close',
 				'name' => 'registration_close',
 				'type' => 'date_picker',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -346,6 +382,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Registration Link',
 				'name' => 'registration_link',
 				'type' => 'url',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -353,6 +390,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Room',
 				'name' => 'room',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -360,6 +398,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Room Notes',
 				'name' => 'room_notes',
 				'type' => 'textarea',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -367,6 +406,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Secondary CE Credits',
 				'name' => 'secondary_ce_credits',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -374,6 +414,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Secondary CE Type Name',
 				'name' => 'secondary_ce_type_name',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -381,6 +422,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Segment Applied',
 				'name' => 'segment_applied',
 				'type' => 'true_false',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -388,6 +430,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Start Time',
 				'name' => 'start_time',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 			array(
@@ -395,6 +438,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Tags',
 				'name' => 'tags',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 0,
 			),
 			array(
@@ -402,6 +446,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'label' => 'Time Zone',
 				'name' => 'time_zone',
 				'type' => 'text',
+				'show_in_rest' => true,
 				'required' => 1,
 			),
 		),
