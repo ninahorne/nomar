@@ -521,6 +521,70 @@ function update_all_custom_fields($post_id, $event_data)
 	update_post_meta($post_id, 'time_zone', $event_data['time_zone']);
 }
 
+// Manually include ACF fields as top-level fields in the REST API response for the 'events' post type
+add_action('rest_api_init', function () {
+	// List all the ACF field names that you want to expose as top-level fields
+	$acf_field_names = array(
+		'capacity',
+		'ce',
+		'ce_credits',
+		'ce_type_name',
+		'course_id',
+		'course_image',
+		'course_number',
+		'early_bird_end_date',
+		'early_bird_member_price',
+		'early_bird_price',
+		'early_bird_pricing',
+		'end_time',
+		'event_date',
+		'event_description',
+		'event_id',
+		'event_title',
+		'event_type',
+		'instructor2_bio',
+		'instructor2_image',
+		'instructor2_name',
+		'instructor_bio',
+		'instructor_image',
+		'instructor_name',
+		'last_updated',
+		'location',
+		'location_address',
+		'location_notes',
+		'location_type',
+		'member_only',
+		'member_price',
+		'online_registration',
+		'price',
+		'provider_name',
+		'provider_number',
+		'registered',
+		'registration_close',
+		'registration_link',
+		'room',
+		'room_notes',
+		'secondary_ce_credits',
+		'secondary_ce_type_name',
+		'segment_applied',
+		'start_time',
+		'tags',
+		'time_zone'
+	);
+
+	// Loop through each ACF field and add it as a top-level field in the REST API response
+	foreach ($acf_field_names as $field_name) {
+		register_rest_field('events', $field_name, array(
+			'get_callback' => function ($post) use ($field_name) {
+				return get_field($field_name, $post['id']);  // Get the value of the ACF field
+			},
+			'schema' => null,
+		));
+	}
+});
+
+
+
 // Function to sync events with the API
 function sync_events_with_api()
 {
