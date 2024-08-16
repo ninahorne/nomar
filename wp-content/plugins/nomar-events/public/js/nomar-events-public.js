@@ -318,6 +318,7 @@
       });
       eventsCache = events;
 
+      console.log({ events });
       events.forEach((e) => {
         addCategories(e.categories);
         addLocations(e.location);

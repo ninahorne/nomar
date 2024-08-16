@@ -103,7 +103,6 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'ce',
 				'type' => 'true_false',
 				'show_in_rest' => true,
-				'required' => 1,
 			),
 			array(
 				'key' => 'field_ce_credits',
