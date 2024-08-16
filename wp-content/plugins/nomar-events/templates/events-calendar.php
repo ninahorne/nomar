@@ -6,10 +6,10 @@
 <link rel="stylesheet" src="/wp-content/plugins/nomar-events/public/css/nomar-events-public.css" />
 <div id="filters">
   <select name="category" id="category">
-    <option value="" selected disabled> Category</option>
+    <option value=""> All Categories</option>
   </select>
   <select name="location" id="location">
-    <option value="" selected disabled> Location</option>
+    <option value=""> All Locations</option>
   </select>
 </div>
 <div id="desktopCalendar"></div>
