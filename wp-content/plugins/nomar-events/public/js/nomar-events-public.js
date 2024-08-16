@@ -26,20 +26,21 @@
       'Designation',
       'Advocacy',
     ];
-    let locations = [];
+    let locations = ['Northshore', 'Southshore', 'Virtual '];
 
     const addCategories = (eventCategories) => {
-      eventCategories.forEach((cat) => {
-        if (!categories.includes(cat)) {
-          categories.push(cat);
-        }
-      });
+      // eventCategories.forEach((cat) => {
+      //   if (!categories.includes(cat)) {
+      //     categories.push(cat);
+      //   }
+      // });
+      categories = categories.sort();
     };
 
     const addLocations = (eventLocation) => {
-      if (!locations.includes(eventLocation)) {
-        locations.push(eventLocation);
-      }
+      // if (!locations.includes(eventLocation)) {
+      //   locations.push(eventLocation);
+      // }
       locations = locations.sort();
     };
 
@@ -76,6 +77,13 @@
         const locationMatch = locationValue
           ? event.location === locationValue
           : true; // If "All Locations" is selected, include all locations
+
+        console.log({
+          categoryMatch,
+          locationMatch,
+          locationValue,
+          location: event.location,
+        });
         return categoryMatch && locationMatch;
       });
 
