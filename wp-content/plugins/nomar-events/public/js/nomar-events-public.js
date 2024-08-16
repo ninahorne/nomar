@@ -11,8 +11,87 @@
     const TRANS_YELLOW = 'rgba(249, 158, 41, 0.3)';
 
     let events = [];
+    let eventsCache = [];
     let dayGridCalendar;
     let listWeekCalendar;
+    let categories = [
+      'NOMAR YPN',
+      'Code of Ethics',
+      'Commercial',
+      'Fair Housing',
+      'New Member Orientation',
+      'MLS',
+      'Meeting',
+      'Certification',
+      'Designation',
+      'Advocacy',
+    ];
+    let locations = [];
+
+    const addCategories = (eventCategories) => {
+      eventCategories.forEach((cat) => {
+        if (!categories.includes(cat)) {
+          categories.push(cat);
+        }
+      });
+    };
+
+    const addLocations = (eventLocation) => {
+      if (!locations.includes(eventLocation)) {
+        locations.push(eventLocation);
+      }
+      locations = locations.sort();
+    };
+
+    const setUpFilterDropdowns = () => {
+      const categoriesSelect = document.getElementById('category');
+      const locationsSelect = document.getElementById('location');
+
+      // Generate dropdown options, including "All Categories" and "All Locations"
+      const catHTML = categories
+        .map((cat) => `<option value="${cat}">${cat}</option>`)
+        .join('');
+      const locHTML = locations
+        .map((loc) => `<option value="${loc}">${loc}</option>`)
+        .join('');
+
+      // Set default options as "All Categories" and "All Locations"
+      categoriesSelect.innerHTML = `<option value="" selected>All Categories</option>${catHTML}`;
+      locationsSelect.innerHTML = `<option value="" selected>All Locations</option>${locHTML}`;
+
+      // Attach event listeners to dropdowns
+      categoriesSelect.addEventListener('change', applyFilters);
+      locationsSelect.addEventListener('change', applyFilters);
+    };
+
+    const applyFilters = () => {
+      const categoryValue = document.getElementById('category').value;
+      const locationValue = document.getElementById('location').value;
+
+      // Filter events based on selected category and location
+      events = eventsCache.filter((event) => {
+        const categoryMatch = categoryValue
+          ? event.categories.includes(categoryValue)
+          : true; // If "All Categories" is selected, include all categories
+        const locationMatch = locationValue
+          ? event.location === locationValue
+          : true; // If "All Locations" is selected, include all locations
+        return categoryMatch && locationMatch;
+      });
+
+      reRenderCalendars();
+    };
+
+    const reRenderCalendars = () => {
+      dayGridCalendar.removeAllEvents();
+      listWeekCalendar.removeAllEvents();
+
+      dayGridCalendar.addEventSource(events);
+      listWeekCalendar.addEventSource(events);
+
+      dayGridCalendar.render();
+      listWeekCalendar.render();
+    };
 
     const formatMoney = (input = 0) => {
       return '$' + input?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -217,12 +296,8 @@
     // Fetch all events
     try {
       events = await fetchAllEvents();
-
       let slugSet = new Set();
       events = events.map((event) => {
-        // let slug = slugify(`${event.event_title}`, {
-        //   lower: true,
-        // });
         let slug = event.slug;
         let index = 1;
         while (slugSet.has(slug)) {
@@ -241,6 +316,14 @@
           slug,
         };
       });
+      eventsCache = events;
+
+      events.forEach((e) => {
+        addCategories(e.categories);
+        addLocations(e.location);
+      });
+
+      setUpFilterDropdowns();
 
       checkForOpenEvent();
       const desktopCal = document.getElementById('desktopCalendar');
