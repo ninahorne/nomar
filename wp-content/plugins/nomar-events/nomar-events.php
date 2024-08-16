@@ -95,7 +95,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'capacity',
 				'type' => 'number',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_ce',
@@ -126,7 +126,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'course_id',
 				'type' => 'text',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_course_image',
@@ -142,7 +142,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'course_number',
 				'type' => 'text',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_early_bird_end_date',
@@ -182,7 +182,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'end_time',
 				'type' => 'text',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_event_date',
@@ -190,7 +190,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'event_date',
 				'type' => 'date_picker',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_event_description',
@@ -198,7 +198,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'event_description',
 				'type' => 'textarea',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_event_id',
@@ -206,7 +206,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'event_id',
 				'type' => 'text',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_event_title',
@@ -214,7 +214,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'event_title',
 				'type' => 'text',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_event_type',
@@ -222,7 +222,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'event_type',
 				'type' => 'text',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_instructor2_bio',
@@ -254,7 +254,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'instructor_bio',
 				'type' => 'textarea',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_instructor_image',
@@ -270,7 +270,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'instructor_name',
 				'type' => 'text',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_last_updated',
@@ -286,7 +286,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'location',
 				'type' => 'text',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_location_address',
@@ -294,7 +294,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'location_address',
 				'type' => 'text',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_location_notes',
@@ -310,7 +310,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'location_type',
 				'type' => 'text',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_member_only',
@@ -334,7 +334,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'online_registration',
 				'type' => 'true_false',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_price',
@@ -342,7 +342,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'price',
 				'type' => 'number',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_provider_name',
@@ -350,7 +350,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'provider_name',
 				'type' => 'text',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_provider_number',
@@ -358,7 +358,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'provider_number',
 				'type' => 'text',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_registered',
@@ -374,7 +374,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'registration_close',
 				'type' => 'date_picker',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_registration_link',
@@ -430,7 +430,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'start_time',
 				'type' => 'text',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 			array(
 				'key' => 'field_tags',
@@ -446,7 +446,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'time_zone',
 				'type' => 'text',
 				'show_in_rest' => true,
-				'required' => 1,
+
 			),
 		),
 		'location' => array(
