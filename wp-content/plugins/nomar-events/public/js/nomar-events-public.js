@@ -1,9 +1,8 @@
 (function ($) {
   'use strict';
-  const apiURL =
-    'https://api.tangilla.com/event/v1/feed/4420/live?include_current_month_events=true';
+  const apiBaseURL = 'https://nomar.org/wp-json/wp/v2/events';
 
-  $(window).load(function () {
+  $(window).load(async function () {
     MicroModal.init();
 
     const BLUE = '#142665';
@@ -11,15 +10,17 @@
     const TRANS_BLUE = 'rgba(20, 38, 101, 0.3)';
     const TRANS_YELLOW = 'rgba(249, 158, 41, 0.3)';
 
-    let events;
+    let events = [];
     let dayGridCalendar;
     let listWeekCalendar;
 
     const formatMoney = (input = 0) => {
       return '$' + input?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     };
+
     const getRow = (label, value) =>
       `<div class="grid__row"><p class="grid__label">${label}: </p> <p>${value}</p></div>`;
+
     const getFormattedTime = (timeString) => {
       const [hours, minutes] = timeString.split(':').map(Number);
 
@@ -45,6 +46,7 @@
     const getTimeString = (start, end) => {
       return `${getFormattedTime(start)} - ${getFormattedTime(end)}`;
     };
+
     const getDate = (input) => {
       const timeZone = 'UTC'; // Set your desired time zone here
 
@@ -84,6 +86,7 @@
 
       return rows.join('');
     };
+
     const getLeftDetailsContent = (event) => {
       const rows = [];
       if (event.capacity && event.registered) {
@@ -184,52 +187,75 @@
         openEvent(event_id);
       }
     };
-    $.ajax({
-      url: apiURL,
-      method: 'GET',
-      dataType: 'json',
-      success: function (data) {
-        console.log({ data });
-        let slugSet = new Set();
-        events = data.map((event) => {
-          let slug = slugify(`${event.event_title}`, {
-            lower: true,
-          });
-          let index = 1;
-          while (slugSet.has(slug)) {
-            slug = `${slug}-${index}`;
-            index++;
-          }
-          slugSet.add(slug);
-          return {
-            ...event,
-            title: event.event_title,
-            date: event.event_date,
-            color: event.event_type == 'class' ? TRANS_BLUE : TRANS_YELLOW,
-            borderColor: event.event_type == 'class' ? BLUE : YELLOW,
-            start: `${event.event_date}T${event.start_time}`,
-            end: `${event.event_date}T${event.end_time}`,
-            slug,
-          };
+
+    // Fetch all pages of events and combine them
+    const fetchAllEvents = async () => {
+      let allEvents = [];
+      let page = 1;
+      let perPage = 100;
+      let morePages = true;
+
+      while (morePages) {
+        const response = await $.ajax({
+          url: `${apiBaseURL}?per_page=${perPage}&page=${page}`,
+          method: 'GET',
+          dataType: 'json',
         });
 
-        checkForOpenEvent();
-        const desktopCal = document.getElementById('desktopCalendar');
-        const mobileCal = document.getElementById('mobileCalendar');
+        allEvents = [...allEvents, ...response];
 
-        dayGridCalendar = getCalendar(desktopCal, 'dayGridMonth');
-        listWeekCalendar = getCalendar(mobileCal, 'listMonth');
+        if (response.length < perPage) {
+          morePages = false;
+        } else {
+          page++;
+        }
+      }
 
-        dayGridCalendar.render();
-        listWeekCalendar.render();
-      },
-      error: function (xhr, status, error) {
-        // Handle any errors that occur during the AJAX request
-        console.error('Error: ' + error);
-        $('#api-data').html(
-          'An error occurred while fetching data from the API.',
-        );
-      },
-    });
+      return allEvents;
+    };
+
+    // Fetch all events
+    try {
+      events = await fetchAllEvents();
+
+      let slugSet = new Set();
+      events = events.map((event) => {
+        // let slug = slugify(`${event.event_title}`, {
+        //   lower: true,
+        // });
+        let slug = event.slug;
+        let index = 1;
+        while (slugSet.has(slug)) {
+          slug = `${slug}-${index}`;
+          index++;
+        }
+        slugSet.add(slug);
+        return {
+          ...event,
+          title: event.event_title,
+          date: event.event_date,
+          color: event.event_type == 'class' ? TRANS_BLUE : TRANS_YELLOW,
+          borderColor: event.event_type == 'class' ? BLUE : YELLOW,
+          start: `${event.event_date}T${event.start_time}`,
+          end: `${event.event_date}T${event.end_time}`,
+          slug,
+        };
+      });
+
+      checkForOpenEvent();
+      const desktopCal = document.getElementById('desktopCalendar');
+      const mobileCal = document.getElementById('mobileCalendar');
+
+      dayGridCalendar = getCalendar(desktopCal, 'dayGridMonth');
+      listWeekCalendar = getCalendar(mobileCal, 'listMonth');
+
+      dayGridCalendar.render();
+      listWeekCalendar.render();
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      $('#api-data').html(
+        'An error occurred while fetching data from the API.',
+      );
+    }
   });
 })(jQuery);
