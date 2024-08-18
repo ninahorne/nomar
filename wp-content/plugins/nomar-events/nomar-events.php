@@ -104,6 +104,7 @@ if (function_exists('acf_add_local_field_group')) {
 				'type' => 'true_false',
 				'show_in_rest' => true,
 			),
+
 			array(
 				'key' => 'field_ce_credits',
 				'label' => 'CE Credits',
@@ -748,3 +749,42 @@ add_action('admin_head', 'custom_admin_styles');
 // 	}
 // }
 // add_action('shutdown', 'unschedule_tangilla_sync');
+
+// Hook into the save_post action to modify and save additional formats for specific fields
+add_action('save_post', 'save_custom_formats_for_fields', 10, 3);
+
+function save_custom_formats_for_fields($post_id, $post, $update)
+{
+	// Make sure this is for the 'events' post type
+	if ($post->post_type !== 'events') {
+		return;
+	}
+
+	// Avoid infinite loop
+	remove_action('save_post', 'save_custom_formats_for_fields');
+
+	// List of date fields and boolean fields to process
+	$date_fields = array('event_date', 'early_bird_end_date', 'registration_close', 'last_updated');
+	$boolean_fields = array('ce', 'early_bird_pricing', 'online_registration', 'member_only', 'segment_applied');
+
+	// Process date fields
+	foreach ($date_fields as $field) {
+		$date_value = get_post_meta($post_id, $field, true);
+		if (!empty($date_value)) {
+			$formatted_date = date('D, F jS, Y', strtotime($date_value)); // Format: Mon, July 4th, 2024
+			update_post_meta($post_id, $field . '_formatted', $formatted_date);
+		}
+	}
+
+	// Process boolean fields
+	foreach ($boolean_fields as $field) {
+		$boolean_value = get_post_meta($post_id, $field, true);
+		if ($boolean_value !== '') {
+			$formatted_boolean = $boolean_value ? 'yes' : 'no'; // Convert to 'yes' or 'no'
+			update_post_meta($post_id, $field . '_formatted', $formatted_boolean);
+		}
+	}
+
+	// Re-add the action after processing
+	add_action('save_post', 'save_custom_formats_for_fields', 10, 3);
+}
