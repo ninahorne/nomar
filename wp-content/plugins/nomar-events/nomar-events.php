@@ -73,8 +73,8 @@ function create_post_type_events()
 				'singular_name' => __('Event')
 			),
 			'public' => true,
-			'has_archive' => true,
-			'rewrite' => array('slug' => 'events'),
+			'has_archive' => 'events-archive', // Archive will be accessible at /events-archive
+			'rewrite' => array('slug' => 'events'), // Single posts will be at /events/{post-name}
 			'supports' => array('title', 'editor', 'thumbnail', 'custom-fields', 'revisions'),
 			'taxonomies' => array('category', 'post_tag'), // Adds support for categories and tags
 			'show_in_rest' => true, // Enables Gutenberg editor support
@@ -766,6 +766,7 @@ function save_custom_formats_for_fields($post_id, $post, $update)
 	// List of date fields and boolean fields to process
 	$date_fields = array('event_date', 'early_bird_end_date', 'registration_close', 'last_updated');
 	$boolean_fields = array('ce', 'early_bird_pricing', 'online_registration', 'member_only', 'segment_applied');
+	$time_fields = array('start_time', 'end_time');
 
 	// Process date fields
 	foreach ($date_fields as $field) {
@@ -782,9 +783,243 @@ function save_custom_formats_for_fields($post_id, $post, $update)
 		if ($boolean_value !== '') {
 			$formatted_boolean = $boolean_value ? 'yes' : 'no'; // Convert to 'yes' or 'no'
 			update_post_meta($post_id, $field . '_formatted', $formatted_boolean);
+		} else {
+			update_post_meta($post_id, $field . '_formatted', 'no');
+		}
+	}
+
+	// Process time fields
+	foreach ($time_fields as $field) {
+		$time_value = get_post_meta($post_id, $field, true);
+		if (!empty($time_value)) {
+			$formatted_time = format_time($time_value); // Custom function to format time
+			update_post_meta($post_id, $field . '_formatted', $formatted_time);
 		}
 	}
 
 	// Re-add the action after processing
 	add_action('save_post', 'save_custom_formats_for_fields', 10, 3);
 }
+
+// Custom function to format time (e.g., '09:00' to '9am' and '13:00' to '1pm')
+function format_time($time)
+{
+	return strtolower(date('gA', strtotime($time)));
+}
+
+function add_custom_columns($columns)
+{
+	// Add new columns after the 'Title' column
+	$columns['event_date'] = __('Event Date');
+	$columns['event_type'] = __('Event Type');
+	return $columns;
+}
+add_filter('manage_events_posts_columns', 'add_custom_columns');
+function display_custom_columns($column, $post_id)
+{
+	switch ($column) {
+		case 'event_date':
+			$event_date = get_post_meta($post_id, 'event_date', true);
+			echo $event_date ? esc_html($event_date) : __('N/A');
+			break;
+		case 'event_type':
+			$event_type = get_post_meta($post_id, 'event_type', true);
+			echo $event_type ? esc_html($event_type) : __('N/A');
+			break;
+	}
+}
+add_action('manage_events_posts_custom_column', 'display_custom_columns', 10, 2);
+function make_custom_columns_sortable($columns)
+{
+	$columns['event_date'] = 'event_date';
+	$columns['event_type'] = 'event_type';
+	return $columns;
+}
+add_filter('manage_edit-events_sortable_columns', 'make_custom_columns_sortable');
+
+
+// ** LOOPER PROVIDER STUFF ** //
+// Custom Looper Provider for Cornerstone
+add_filter('cs_looper_custom_my_data', function ($result, $params) {
+
+	// Extract the parameters passed from the Looper's Params field
+	global $captured_params;
+	$category = isset($captured_params['c_cat']) ? sanitize_text_field($captured_params['c_cat']) : '';
+	$location = isset($captured_params['loc']) ? sanitize_text_field($captured_params['loc']) : '';
+	$event_type = isset($params['event_type']) ? sanitize_text_field($params['event_type']) : '';
+
+	// Get today's date in the format needed for comparison (Ymd)
+	$today = date('Ymd');
+
+	// Basic query arguments
+	$args = array(
+		'post_type' => 'events',
+		'posts_per_page' => -1,
+		'meta_query' => array(
+			'relation' => 'AND',
+			// Filter for events today or in the future
+			array(
+				'key' => 'event_date',
+				'value' => $today,
+				'compare' => '>=',
+				'type' => 'DATE',
+			),
+			// Filter by event type if provided
+			array(
+				'key' => 'event_type',
+				'value' => $event_type,
+				'compare' => '=',
+			),
+		),
+		// Sort by event date, ascending (soonest to latest)
+		'orderby' => 'meta_value',
+		'meta_key' => 'event_date',
+		'order' => 'ASC',
+	);
+
+	// Add category filter if provided
+	if (!empty($category)) {
+		// Check if tax_query already exists, and if so, append to it
+		if (isset($args['tax_query'])) {
+			$args['tax_query'][] = array(
+				'taxonomy' => 'category',
+				'field' => 'name',
+				'terms' => $category,
+			);
+		} else {
+			$args['tax_query'] = array(
+				array(
+					'taxonomy' => 'category',
+					'field' => 'name',
+					'terms' => $category,
+				),
+			);
+		}
+	}
+
+	// Add location filter if provided
+	if (!empty($location)) {
+		$args['meta_query'][] = array(
+			'key' => 'location',
+			'value' => $location,
+			'compare' => '='
+		);
+	}
+
+	// Perform the query
+	$query = new WP_Query($args);
+	$events = array();
+
+	if ($query->have_posts()) {
+		while ($query->have_posts()) {
+			$query->the_post();
+			$post = get_post();
+			// Get all ACF fields for the post
+			$acf_fields = get_fields();
+
+			// If there are ACF fields, add them to the post object
+			if ($acf_fields) {
+				foreach ($acf_fields as $field_key => $field_value) {
+					$post->$field_key = $field_value;
+				}
+			}
+			// Add categories as well
+			$post->category = wp_get_post_terms(get_the_ID(), 'category', array('fields' => 'names'));
+			// Add the featured image URL
+			$post->featured_image = get_the_post_thumbnail_url(get_the_ID(), 'full'); // 'full' can be replaced with any size
+
+			// Add the post object to the events array
+			$events[] = $post;
+		}
+	}
+	// Reset the global post data
+	wp_reset_postdata();
+
+	return $events;
+}, 10, 2);
+
+
+function events_filters_shortcode($atts)
+{
+	// Enqueue your JavaScript file
+	wp_enqueue_script('events-filters', '/wp-content/plugins/nomar-events/public/js/events-filters.js', array(), null, true);
+
+	ob_start();
+	$atts = shortcode_atts(array(
+		'event_type' => 'event', // Default to 'event' if not provided
+	), $atts);
+
+	// Include your PHP template file
+	include __DIR__ . '/templates/events-filters.php';
+
+	// Get the content from the output buffer and clean it
+	return ob_get_clean();
+}
+
+add_shortcode('events_filters', 'events_filters_shortcode');
+
+
+function add_custom_query_vars($vars)
+{
+	$vars[] = 'c_cat';
+	$vars[] = 'loc';
+	return $vars;
+}
+add_filter('query_vars', 'add_custom_query_vars');
+
+function capture_query_parameters()
+{
+	global $captured_params;
+
+	$captured_params = array(
+		'c_cat' => get_query_var('c_cat', ''),
+		'loc' => get_query_var('loc', '')
+	);
+}
+add_action('wp', 'capture_query_parameters');
+
+function save_category_list_meta($post_id)
+{
+	// Check if this is an 'event' post type
+	if (get_post_type($post_id) !== 'events') {
+		return;
+	}
+
+	// Avoid infinite loops by checking if the post is being autosaved or a revision
+	if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+		return;
+	}
+	if (wp_is_post_revision($post_id)) {
+		return;
+	}
+
+	// Get the categories associated with the post
+	$categories = wp_get_post_terms($post_id, 'category', array('fields' => 'names'));
+
+	// Capitalize and create a comma-separated list
+	$category_list = array_map('ucwords', $categories); // Capitalize each category name
+	$category_list_string = implode(', ', $category_list); // Join them into a string
+
+	// Update the post meta with the generated string
+	update_post_meta($post_id, 'category_list', $category_list_string);
+}
+add_action('save_post', 'save_category_list_meta');
+
+function add_category_names_to_events()
+{
+	register_rest_field('events', 'category_names', array(
+		'get_callback' => function ($object) {
+			$category_ids = wp_get_post_categories($object['id']);
+			$categories = [];
+			foreach ($category_ids as $category_id) {
+				$category = get_category($category_id);
+				if ($category) {
+					$categories[] = $category->name;
+				}
+			}
+			return $categories;
+		},
+		'schema' => null,
+	));
+}
+add_action('rest_api_init', 'add_category_names_to_events');

@@ -14,33 +14,22 @@
     let eventsCache = [];
     let dayGridCalendar;
     let listWeekCalendar;
-    let categories = [
-      'NOMAR YPN',
-      'Code of Ethics',
-      'Commercial',
-      'Fair Housing',
-      'New Member Orientation',
-      'MLS',
-      'Meeting',
-      'Certification',
-      'Designation',
-      'Advocacy',
-    ];
-    let locations = ['Northshore', 'Southshore', 'Virtual '];
+    let categories = [];
+    let locations = [];
 
-    const addCategories = (eventCategories) => {
-      // eventCategories.forEach((cat) => {
-      //   if (!categories.includes(cat)) {
-      //     categories.push(cat);
-      //   }
-      // });
+    const addCategories = async (eventCategories) => {
+      eventCategories.forEach((cat) => {
+        if (!categories.includes(cat)) {
+          categories.push(cat);
+        }
+      });
       categories = categories.sort();
     };
 
     const addLocations = (eventLocation) => {
-      // if (!locations.includes(eventLocation)) {
-      //   locations.push(eventLocation);
-      // }
+      if (!locations.includes(eventLocation)) {
+        locations.push(eventLocation);
+      }
       locations = locations.sort();
     };
 
@@ -72,18 +61,12 @@
       // Filter events based on selected category and location
       events = eventsCache.filter((event) => {
         const categoryMatch = categoryValue
-          ? event.categories.includes(categoryValue)
+          ? event.category_names.includes(categoryValue)
           : true; // If "All Categories" is selected, include all categories
         const locationMatch = locationValue
           ? event.location === locationValue
           : true; // If "All Locations" is selected, include all locations
 
-        console.log({
-          categoryMatch,
-          locationMatch,
-          locationValue,
-          location: event.location,
-        });
         return categoryMatch && locationMatch;
       });
 
@@ -328,7 +311,7 @@
 
       console.log({ events });
       events.forEach((e) => {
-        addCategories(e.categories);
+        addCategories(e.category_names);
         addLocations(e.location);
       });
 
