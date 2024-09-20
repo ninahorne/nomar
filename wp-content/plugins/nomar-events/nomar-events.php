@@ -889,7 +889,7 @@ function save_custom_formats_for_fields($post_id, $post, $update)
 // Custom function to format time (e.g., '09:00' to '9am' and '13:00' to '1pm')
 function format_time($time)
 {
-	return strtolower(date('gA', strtotime($time)));
+	return strtolower(date('g:ia', strtotime($time))); // 'g' for hour, 'i' for minutes, 'a' for am/pm
 }
 
 function add_custom_columns($columns)

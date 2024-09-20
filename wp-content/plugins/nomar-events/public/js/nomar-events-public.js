@@ -118,7 +118,14 @@
     };
 
     const getDate = (input) => {
-      const timeZone = 'UTC'; // Set your desired time zone here
+      const timeZone = 'America/Chicago'; // Set the desired time zone
+
+      // Handle MM/DD/YYYY format
+      const parts = input.split('/');
+      if (parts.length === 3) {
+        const [month, day, year] = parts;
+        input = `${year}-${month}-${day}`; // Convert to YYYY-MM-DD format
+      }
 
       const options = {
         weekday: 'long',
@@ -128,10 +135,15 @@
         timeZone: timeZone,
       };
 
-      const formattedDate = new Intl.DateTimeFormat('en-US', options).format(
-        new Date(`${input}T00:00:00.000Z`),
-      );
-      return formattedDate;
+      try {
+        const formattedDate = new Intl.DateTimeFormat('en-US', options).format(
+          new Date(`${input}T00:00:00`),
+        );
+        return formattedDate;
+      } catch (error) {
+        console.error('Error formatting date:', error, { input });
+        return input; // Return the original input if parsing fails
+      }
     };
 
     const getRightDetailsContent = (event) => {
@@ -234,7 +246,6 @@
       registerEl.setAttribute('href', event.registration_link);
       const categoryEl = document.getElementById('modalCategories');
       const categories = event.category_names;
-      console.log({ event });
       categoryEl.innerHTML = categories
         .map(
           (cat, index) =>
@@ -295,7 +306,7 @@
     };
     const formatDate = (date) => {
       // Check if the input date is a string and handle non-standard formats
-      if (isNaN(new Date(date))) {
+      if (date.includes('/')) {
         const splitDate = date.split('/');
         const year = splitDate[2];
         const month = splitDate[1];
@@ -334,7 +345,9 @@
         };
       });
       eventsCache = events;
-      console.log(events.map((e) => e.date));
+      console.log(
+        events.map((event) => ({ date: event.event_date, title: event.title })),
+      );
       events.forEach((e) => {
         addCategories(e.category_names);
         addLocations(e.location);
