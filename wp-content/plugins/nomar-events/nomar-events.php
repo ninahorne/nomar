@@ -449,6 +449,14 @@ if (function_exists('acf_add_local_field_group')) {
 				'show_in_rest' => true,
 
 			),
+			array(
+				'key' => 'field_availability',
+				'label' => 'Available Tickets',
+				'name' => 'availability',
+				'type' => 'number',
+				'show_in_rest' => true,
+
+			),
 		),
 		'location' => array(
 			array(
@@ -473,6 +481,7 @@ if (function_exists('acf_add_local_field_group')) {
 // Function to update all custom fields
 function update_all_custom_fields($post_id, $event_data)
 {
+	var_dump($event_data);
 	// Update all custom fields
 	update_post_meta($post_id, 'capacity', $event_data['capacity']);
 	update_post_meta($post_id, 'ce', $event_data['ce']);
@@ -585,8 +594,7 @@ add_action('rest_api_init', function () {
 
 
 
-// Function to sync events with the API
-function sync_events_with_api()
+function sync_events_with_api($messages = array())
 {
 	$api_url = 'https://api.tangilla.com/event/v1/feed/4420/live?include_current_month_events=true';
 	$response = wp_remote_get($api_url);
@@ -604,14 +612,22 @@ function sync_events_with_api()
 		return;
 	}
 
+	// Store the event IDs fetched from the API to track which events to keep
+	$api_event_ids = array_column($events_data, 'event_id');
+
+	$messages['api_event_ids'] = $api_event_ids;
+
+	// Get existing events from the database
 	$existing_events = new WP_Query(array(
 		'post_type' => 'events',
 		'posts_per_page' => -1,
 		'post_status' => 'publish',
 	));
 
-	$existing_event_ids = array();
-	$event_ids_to_keep = array();
+	$all_events = 0;
+	$updated_events = 0;
+	$deleted_events = 0;
+	$new_events = 0;
 
 	if ($existing_events->have_posts()) {
 		while ($existing_events->have_posts()) {
@@ -619,33 +635,41 @@ function sync_events_with_api()
 			$post_id = get_the_ID();
 			$event_id = get_post_meta($post_id, 'event_id', true);
 
-			$matching_event = array_filter($events_data, function ($event) use ($event_id) {
-				return $event['event_id'] == $event_id;
-			});
+			// Check if this event exists in the API response
+			if (in_array($event_id, $api_event_ids)) {
+				$updated_events++;
+				foreach ($events_data as $event) {
+					if ($event['event_id'] == $event_id) {
+						// Convert the event date from YYYY-MM-DD to MM/DD/YYYY
+						$event_date = convert_event_date_format($event['event_date']);
 
-			if (!empty($matching_event)) {
-				$matching_event = reset($matching_event);
+						wp_update_post(array(
+							'ID' => $post_id,
+							'post_title' => $event['event_title'],
+							'post_content' => $event['event_description'],
+						));
 
-				wp_update_post(array(
-					'ID' => $post_id,
-					'post_title' => $matching_event['event_title'],
-					'post_content' => $matching_event['event_description'],
-				));
-
-				update_all_custom_fields($post_id, $matching_event);
-				$event_ids_to_keep[] = $event_id;
+						update_post_meta($post_id, 'event_date', $event_date);
+						update_all_custom_fields($post_id, $event);
+						break;
+					}
+				}
 			} else {
-				wp_delete_post($post_id, true);
+				wp_delete_post($post_id, true); // Delete if the event no longer exists in the API response
+				$deleted_events++;
 			}
-
-			$existing_event_ids[] = $event_id;
+			$all_events++;
 		}
 	}
 
 	wp_reset_postdata();
 
+	// Insert new events that don't exist in the database yet
 	foreach ($events_data as $event) {
-		if (!in_array($event['event_id'], $existing_event_ids)) {
+		if (!post_exists_by_event_id($event['event_id'])) {
+			// Convert the event date from YYYY-MM-DD to MM/DD/YYYY
+			$event_date = convert_event_date_format($event['event_date']);
+
 			$new_post_id = wp_insert_post(array(
 				'post_type' => 'events',
 				'post_title' => $event['event_title'],
@@ -653,10 +677,71 @@ function sync_events_with_api()
 				'post_status' => 'publish',
 			));
 
+			update_post_meta($new_post_id, 'event_date', $event_date);
+			$new_events++;
 			update_all_custom_fields($new_post_id, $event);
 		}
 	}
+
+	var_dump(array(
+		'all_events' => $all_events,
+		'new_events' => $new_events,
+		'updated_events' => $updated_events,
+		'deleted_events' => $deleted_events
+	));
 }
+
+// Helper function to convert a date from YYYY-MM-DD to MM/DD/YYYY
+function convert_event_date_format($date_string)
+{
+	// Create a DateTime object from the original format (YYYY-MM-DD)
+	$date_object = DateTime::createFromFormat('Y-m-d', $date_string);
+
+	// Return the formatted date as MM/DD/YYYY
+	return $date_object ? $date_object->format('m/d/Y') : $date_string;
+}
+
+
+// Function to normalize the event date format
+function normalize_event_date($date_string)
+{
+	// Check if date is in d/m/y or m/d/y format and normalize to m/d/y
+	$date_object = DateTime::createFromFormat('d/m/y', $date_string);
+
+	if (!$date_object) {
+		// If it doesn't match d/m/y, try m/d/y
+		$date_object = DateTime::createFromFormat('m/d/y', $date_string);
+	}
+
+	if ($date_object) {
+		// Return normalized date format as m/d/y
+		return $date_object->format('m/d/y');
+	}
+
+	// If date couldn't be parsed, return it as is (or handle it as an error)
+	return $date_string;
+}
+
+
+
+// Helper function to check if a post exists by event_id
+function post_exists_by_event_id($event_id)
+{
+	$existing_post = new WP_Query(array(
+		'post_type' => 'events',
+		'meta_query' => array(
+			array(
+				'key' => 'event_id',
+				'value' => $event_id,
+				'compare' => '='
+			)
+		),
+		'posts_per_page' => 1,
+	));
+
+	return $existing_post->have_posts();
+}
+
 
 // Add the sync button to the admin bar on the events list page
 function add_sync_events_button($which)
@@ -1021,5 +1106,162 @@ function add_category_names_to_events()
 		},
 		'schema' => null,
 	));
+	register_rest_field('events', 'category_slugs', array(
+		'get_callback' => function ($object) {
+			$category_ids = wp_get_post_categories($object['id']);
+			$categories = [];
+			foreach ($category_ids as $category_id) {
+				$category = get_category($category_id);
+				if ($category) {
+					$categories[] = $category->slug;
+				}
+			}
+			return $categories;
+		},
+		'schema' => null,
+	));
 }
 add_action('rest_api_init', 'add_category_names_to_events');
+
+function nomar_register_sync_events_endpoint()
+{
+	register_rest_route('nomar/v1', '/sync-events', array(
+		'methods' => 'POST', // or 'GET' depending on how you want to trigger it
+		'callback' => 'nomar_sync_events_api_callback',
+
+	));
+}
+add_action('rest_api_init', 'nomar_register_sync_events_endpoint');
+
+function nomar_sync_events_api_callback(WP_REST_Request $request)
+{
+
+	$messages = array();
+	// Call your existing sync function
+	sync_events_with_api($messages);
+
+	// Return a response
+	return new WP_REST_Response(array(
+		'status' => 'success',
+		'message' => 'Events have been successfully synced.',
+		'messages' => $messages
+	), 200);
+}
+
+function simple_test_route()
+{
+	register_rest_route('nomar/v1', '/test', array(
+		'methods' => 'GET',
+		'callback' => function () {
+			return new WP_REST_Response(array(
+				'status' => 'success',
+				'message' => 'Test route is working'
+			), 200);
+		},
+	));
+}
+add_action('rest_api_init', 'simple_test_route');
+
+function update_event_availability($post_id)
+{
+	// Check if the post type is 'events'
+	if (get_post_type($post_id) !== 'events') {
+		return;
+	}
+
+	// Check if it's an autosave, if so, do nothing
+	if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+		return;
+	}
+
+	// Check user permissions (optional, add if needed)
+	if (! current_user_can('edit_post', $post_id)) {
+		return;
+	}
+
+	// Get the custom fields for capacity and registered
+	$capacity = get_post_meta($post_id, 'capacity', true);
+	$registered = get_post_meta($post_id, 'registered', true);
+
+	// Ensure both capacity and registered are numeric values
+	if (is_numeric($capacity) && is_numeric($registered)) {
+		// Calculate availability
+		$availability = $capacity - $registered;
+
+		// Update the availability custom field
+		update_post_meta($post_id, 'availability', $availability);
+	}
+}
+
+// Hook the function to save_post
+add_action('save_post', 'update_event_availability');
+
+add_filter('cs_looper_custom_my_categories_data', function ($result, $params) {
+	// Get the current category
+	if (is_category()) {
+		$current_category = get_queried_object();
+	} else {
+		return []; // Return empty if not on a category archive page
+	}
+
+	// Get today's date in the format needed for comparison (Ymd)
+	$today = date('Ymd');
+
+	// Basic query arguments
+	$args = array(
+		'post_type' => 'events',
+		'posts_per_page' => -1,
+		'meta_query' => array(
+			'relation' => 'AND',
+			// Filter for events today or in the future
+			array(
+				'key' => 'event_date',
+				'value' => $today,
+				'compare' => '>=',
+				'type' => 'DATE',
+			),
+		),
+		// Sort by event date, ascending (soonest to latest)
+		'orderby' => 'meta_value',
+		'meta_key' => 'event_date',
+		'order' => 'ASC',
+		'tax_query' => array(
+			array(
+				'taxonomy' => 'category',
+				'field'    => 'term_id',
+				'terms'    => $current_category->term_id,
+			),
+		),
+	);
+
+	// Perform the query
+	$query = new WP_Query($args);
+	$events = array();
+
+	if ($query->have_posts()) {
+		while ($query->have_posts()) {
+			$query->the_post();
+			$post = get_post();
+			// Get all ACF fields for the post
+			$acf_fields = get_fields();
+
+			// If there are ACF fields, add them to the post object
+			if ($acf_fields) {
+				foreach ($acf_fields as $field_key => $field_value) {
+					$post->$field_key = $field_value;
+				}
+			}
+			// Add categories as well
+			$post->category = wp_get_post_terms(get_the_ID(), 'category', array('fields' => 'names'));
+			// Add the featured image URL
+			$post->featured_image = get_the_post_thumbnail_url(get_the_ID(), 'full'); // 'full' can be replaced with any size
+
+			// Add the post object to the events array
+			$events[] = $post;
+		}
+	}
+	// Reset the global post data
+	wp_reset_postdata();
+
+	return $events;
+}, 10, 2);

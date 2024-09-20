@@ -49,6 +49,9 @@
 
         </div>
 
+        <div id="modalCategories" class="modal__categories">
+
+        </div>
         <div class="modal__description">
           <p id="description"></p>
 

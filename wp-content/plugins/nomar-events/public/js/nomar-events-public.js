@@ -226,13 +226,23 @@
       gridLeft.innerHTML = getLeftDetailsContent(event);
       gridRight.innerHTML = getRightDetailsContent(event);
 
-      const modalEl = document.getElementById(modalId);
       const descriptionEl = document.getElementById('description');
       descriptionEl.innerHTML = event.event_description;
       const titleEl = document.getElementById('eventModal-title');
       titleEl.innerText = event.event_title;
       const registerEl = document.getElementById('register');
       registerEl.setAttribute('href', event.registration_link);
+      const categoryEl = document.getElementById('modalCategories');
+      const categories = event.category_names;
+      console.log({ event });
+      categoryEl.innerHTML = categories
+        .map(
+          (cat, index) =>
+            `<a class="category-pill" href="/category/${
+              event.category_slugs?.length ? event.category_slugs[index] : '#'
+            }">${cat}</a>`,
+        )
+        .join('');
 
       MicroModal.show(modalId, {
         onClose: () => {
@@ -283,7 +293,22 @@
 
       return allEvents;
     };
-
+    const formatDate = (date) => {
+      // Check if the input date is a string and handle non-standard formats
+      if (isNaN(new Date(date))) {
+        const splitDate = date.split('/');
+        const year = splitDate[2];
+        const month = splitDate[1];
+        const day = splitDate[0];
+        return `${year}-${month}-${day}`;
+      } else {
+        const splitDate = date.split('-');
+        const year = splitDate[0];
+        const month = splitDate[1];
+        const day = splitDate[2];
+        return `${year}-${month}-${day}`;
+      }
+    };
     // Fetch all events
     try {
       events = await fetchAllEvents();
@@ -296,20 +321,20 @@
           index++;
         }
         slugSet.add(slug);
+        const date = formatDate(event.event_date);
         return {
           ...event,
           title: event.event_title,
-          date: event.event_date,
+          date,
           color: event.event_type == 'class' ? TRANS_BLUE : TRANS_YELLOW,
           borderColor: event.event_type == 'class' ? BLUE : YELLOW,
-          start: `${event.event_date}T${event.start_time}`,
-          end: `${event.event_date}T${event.end_time}`,
+          start: `${date}T${event.start_time}`,
+          end: `${date}T${event.end_time}`,
           slug,
         };
       });
       eventsCache = events;
-
-      console.log({ events });
+      console.log(events.map((e) => e.date));
       events.forEach((e) => {
         addCategories(e.category_names);
         addLocations(e.location);

@@ -444,3 +444,23 @@
     width: 100%;
   }
 }
+
+.modal__categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+.modal__categories .category-pill {
+  background-color: #f99e29;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 25px;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+  outline: none;
+}
+.modal__categories .category-pill:hover {
+  text-decoration: none;
+}
