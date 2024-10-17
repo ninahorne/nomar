@@ -98,6 +98,6 @@ class Nomar_Events_Public
 		 * class.
 		 */
 
-		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/nomar-events-public.js', array('jquery'), '2.0.0', false);
+		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/nomar-events-public.js', array('jquery'), '2.0.1', false);
 	}
 }

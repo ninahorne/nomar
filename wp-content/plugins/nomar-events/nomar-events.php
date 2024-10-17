@@ -151,7 +151,9 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'early_bird_end_date',
 				'type' => 'date_picker',
 				'show_in_rest' => true,
-				'required' => 0,
+				'display_format' => 'Y-m-d',
+				'return_format' => 'Y-m-d',
+				'first_day' => 1, // 1 for Monday, 0 for Sunday
 			),
 			array(
 				'key' => 'field_early_bird_member_price',
@@ -191,7 +193,9 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'event_date',
 				'type' => 'date_picker',
 				'show_in_rest' => true,
-
+				'display_format' => 'Y-m-d',
+				'return_format' => 'Y-m-d',
+				'first_day' => 1, // 1 for Monday, 0 for Sunday
 			),
 			array(
 				'key' => 'field_event_description',
@@ -279,7 +283,9 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'last_updated',
 				'type' => 'date_picker',
 				'show_in_rest' => true,
-				'required' => 0,
+				'display_format' => 'Y-m-d',
+				'return_format' => 'Y-m-d',
+				'first_day' => 1, // 1 for Monday, 0 for Sunday
 			),
 			array(
 				'key' => 'field_location',
@@ -375,6 +381,9 @@ if (function_exists('acf_add_local_field_group')) {
 				'name' => 'registration_close',
 				'type' => 'date_picker',
 				'show_in_rest' => true,
+				'display_format' => 'Y-m-d',
+				'return_format' => 'Y-m-d',
+				'first_day' => 1, // 1 for Monday, 0 for Sunday
 
 			),
 			array(
@@ -534,6 +543,7 @@ function update_all_custom_fields($post_id, $event_data)
 add_action('rest_api_init', function () {
 	// List all the ACF field names that you want to expose as top-level fields
 	$acf_field_names = array(
+		'availability',
 		'capacity',
 		'ce',
 		'ce_credits',
@@ -612,12 +622,9 @@ function sync_events_with_api($messages = array())
 		return;
 	}
 
-	// Store the event IDs fetched from the API to track which events to keep
 	$api_event_ids = array_column($events_data, 'event_id');
-
 	$messages['api_event_ids'] = $api_event_ids;
 
-	// Get existing events from the database
 	$existing_events = new WP_Query(array(
 		'post_type' => 'events',
 		'posts_per_page' => -1,
@@ -635,27 +642,23 @@ function sync_events_with_api($messages = array())
 			$post_id = get_the_ID();
 			$event_id = get_post_meta($post_id, 'event_id', true);
 
-			// Check if this event exists in the API response
 			if (in_array($event_id, $api_event_ids)) {
 				$updated_events++;
 				foreach ($events_data as $event) {
 					if ($event['event_id'] == $event_id) {
-						// Convert the event date from YYYY-MM-DD to MM/DD/YYYY
-						$event_date = convert_event_date_format($event['event_date']);
-
 						wp_update_post(array(
 							'ID' => $post_id,
 							'post_title' => $event['event_title'],
 							'post_content' => $event['event_description'],
 						));
 
-						update_post_meta($post_id, 'event_date', $event_date);
+						update_post_meta($post_id, 'event_date', $event['event_date']);
 						update_all_custom_fields($post_id, $event);
 						break;
 					}
 				}
 			} else {
-				wp_delete_post($post_id, true); // Delete if the event no longer exists in the API response
+				wp_delete_post($post_id, true);
 				$deleted_events++;
 			}
 			$all_events++;
@@ -664,12 +667,8 @@ function sync_events_with_api($messages = array())
 
 	wp_reset_postdata();
 
-	// Insert new events that don't exist in the database yet
 	foreach ($events_data as $event) {
 		if (!post_exists_by_event_id($event['event_id'])) {
-			// Convert the event date from YYYY-MM-DD to MM/DD/YYYY
-			$event_date = convert_event_date_format($event['event_date']);
-
 			$new_post_id = wp_insert_post(array(
 				'post_type' => 'events',
 				'post_title' => $event['event_title'],
@@ -677,7 +676,7 @@ function sync_events_with_api($messages = array())
 				'post_status' => 'publish',
 			));
 
-			update_post_meta($new_post_id, 'event_date', $event_date);
+			update_post_meta($new_post_id, 'event_date', $event['event_date']);
 			$new_events++;
 			update_all_custom_fields($new_post_id, $event);
 		}

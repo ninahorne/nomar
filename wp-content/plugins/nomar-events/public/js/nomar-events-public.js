@@ -151,7 +151,7 @@
       if (event.instructor_name) {
         rows.push(getRow('Speaker', event.instructor_name));
       }
-
+      console.log(getDate(event.event_date));
       rows.push(getRow('Date', getDate(event.event_date)));
       rows.push(
         getRow('Time', getTimeString(event.start_time, event.end_time)),
@@ -171,10 +171,8 @@
 
     const getLeftDetailsContent = (event) => {
       const rows = [];
-      if (event.capacity && event.registered) {
-        rows.push(
-          getRow('Available Tickets', event.capacity - event.registered),
-        );
+      if (event.availability) {
+        rows.push(getRow('Available Tickets', event.availability));
       }
       if (event.member_price != null && event.member_price != undefined) {
         rows.push(getRow('Member Price', formatMoney(event.member_price)));
@@ -345,9 +343,7 @@
         };
       });
       eventsCache = events;
-      console.log(
-        events.map((event) => ({ date: event.event_date, title: event.title })),
-      );
+
       events.forEach((e) => {
         addCategories(e.category_names);
         addLocations(e.location);
